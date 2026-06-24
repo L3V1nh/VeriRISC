@@ -1,0 +1,16 @@
+# Simulation artifacts
+*.vvp
+*.vcd
+*.lxt
+
+# Common build/output directories
+build/
+dist/
+output/
+
+# Editor/IDE files
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
