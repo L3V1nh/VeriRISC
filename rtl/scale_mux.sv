@@ -9,10 +9,10 @@ module scale_mux #(
     timeprecision 100ps;
 
     always_comb begin : mux_logic
-        out = '0;
-        case(sel_a)
+        unique case(sel_a)
             1'b0: out = in_b;
             1'b1: out = in_a;
+            default: out = 'x;
         endcase
     end
 endmodule
