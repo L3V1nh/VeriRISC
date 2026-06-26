@@ -2,15 +2,12 @@
 *.vvp
 *.vcd
 *.lxt
+*.log
+*.jou
+*.pb
 
 # Common build/output directories
-build/
-dist/
-output/
+xsim.dir/
 
 # Editor/IDE files
 .vscode/
-*.swp
-*.swo
-*~
-.DS_Store
