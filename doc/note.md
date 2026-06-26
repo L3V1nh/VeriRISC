@@ -1,5 +1,10 @@
 ## Module 3: Procedural Statements and Procedural Blocks
-- register -> always_ff
-- mux -> always_comb, unique case
+- register -> To use SystemVerilog procedural constructs to model a simple register.
+- mux -> To use SystemVerilog procedural constructs to model a simple
+multiplexor.
 ## Module 5: Operations
-- counter
+- counter -> To use SystemVerilog procedural constructs and operators to model a
+simple counter.
+## Module 6: User define types
+- controller -> To use SystemVerilog user-defined types, procedural statements, and
+operators to model a state machine.
