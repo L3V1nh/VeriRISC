@@ -39,7 +39,7 @@ iverilog -g2012 -o "$VVP_OUT" "$TB_FILE" "$RTL_FILE"
 
 if [ $? -eq 0 ]; then
     echo "Running simulation..."
-    vvp "$VVP_OUT"
+    (cd "$BUILD_DIR" && vvp "$VVP_OUT")
 else
     echo "Compilation failed!"
     exit 1

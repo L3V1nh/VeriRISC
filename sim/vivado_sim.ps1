@@ -33,6 +33,9 @@ $BuildDir    = Join-Path $ProjectRoot "build"
 
 New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
 
+$StimulusFile = Join-Path $ScriptDir "control_stimulus.pat"
+$ResponseFile = Join-Path $ScriptDir "control_response.pat"
+
 function Get-AbsolutePath([string]$Path) {
     if ([System.IO.Path]::IsPathRooted($Path)) {
         return [System.IO.Path]::GetFullPath($Path)
@@ -111,6 +114,11 @@ Assert-Tool $Xsim
 if ($UsePackage) { Assert-Source $PkgFile }
 Assert-Source $RtlFile
 Assert-Source $TbFile
+Assert-Source $StimulusFile
+Assert-Source $ResponseFile
+
+Copy-Item -Force $StimulusFile $BuildDir
+Copy-Item -Force $ResponseFile $BuildDir
 
 Push-Location $BuildDir
 try {

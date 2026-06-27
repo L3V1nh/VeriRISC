@@ -10,7 +10,7 @@ module control (
     state_t state, state_next;
     opcode_t opc;
 
-    logic ALUOP, HLT, SKZ, JMP, STO;
+    logic ALUOP;
 
     assign ALUOP = opc == ADD | opc == AND | opc ==XOR | opc == LDA;
 
@@ -33,7 +33,7 @@ module control (
             OP_ADDR:{mem_rd, load_ir, halt, inc_pc, load_ac, load_pc, mem_wr} = {2'b00, opc == HLT , 1'b1, 3'd0};
             OP_FETCH:{mem_rd, load_ir, halt, inc_pc, load_ac, load_pc, mem_wr} = {ALUOP, 6'd0};
             ALU_OP:{mem_rd, load_ir, halt, inc_pc, load_ac, load_pc, mem_wr} = {ALUOP, 2'b00, (opc ==SKZ)&&zero, ALUOP,opc == JMP, 1'b0};
-            STORE: {mem_rd, load_ir, halt, inc_pc, load_ac, load_pc, mem_wr} = {ALUOP, 2'b00,opc == JMP,opc == ALUOP,opc == JMP,opc == STO};
+            STORE: {mem_rd, load_ir, halt, inc_pc, load_ac, load_pc, mem_wr} = {ALUOP, 2'b00,opc == JMP, ALUOP,opc == JMP,opc == STO};
             default: {mem_rd, load_ir, halt, inc_pc, load_ac, load_pc, mem_wr} = 'x;
         endcase
     end

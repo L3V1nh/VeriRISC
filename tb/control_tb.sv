@@ -70,6 +70,8 @@ assign lstate = ctrl.state;
 
   // Apply & check Stimulus
   initial begin
+    $dumpfile("control_sim.vcd");
+    $dumpvars(0, control_test);
     $readmemb ( "control_stimulus.pat", stimulus_mem );
     $readmemb ( "control_response.pat", response_mem );
     stimulus_reg = 0;
