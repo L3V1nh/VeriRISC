@@ -7,7 +7,7 @@
 *.pb
 
 # Common build/output directories
-xsim.dir/
+build/
 
 # Editor/IDE files
 .vscode/

@@ -26,12 +26,27 @@ param (
     [string]$Timescale = "1ns/100ps"
 )
 
+# -- Project paths -------------------------------------------
+$ScriptDir   = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ProjectRoot = Split-Path -Parent $ScriptDir
+$BuildDir    = Join-Path $ProjectRoot "build"
+
+New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
+
+function Get-AbsolutePath([string]$Path) {
+    if ([System.IO.Path]::IsPathRooted($Path)) {
+        return [System.IO.Path]::GetFullPath($Path)
+    }
+
+    return [System.IO.Path]::GetFullPath((Join-Path $ScriptDir $Path))
+}
+
 # -- Derived names -------------------------------------------
 $TopName      = "${Module}_test"
 $SnapshotName = "${Module}_sim"
-$PkgFile      = Join-Path $RtlDir "${Module}_pkg.sv"
-$RtlFile      = Join-Path $RtlDir "${Module}.sv"
-$TbFile       = Join-Path $TbDir  "${Module}_tb.sv"
+$PkgFile      = Join-Path (Get-AbsolutePath $RtlDir) "${Module}_pkg.sv"
+$RtlFile      = Join-Path (Get-AbsolutePath $RtlDir) "${Module}.sv"
+$TbFile       = Join-Path (Get-AbsolutePath $TbDir)  "${Module}_tb.sv"
 
 # -- Tool paths ----------------------------------------------
 $BinDir = Join-Path $VivadoPath "bin"
@@ -87,6 +102,7 @@ Write-Host "  Package  : $(if ($UsePackage) { 'Yes' } else { 'No' })"
 Write-Host "  Vivado   : $VivadoPath"
 Write-Host "  RTL dir  : $RtlDir"
 Write-Host "  TB dir   : $TbDir"
+Write-Host "  Build dir: $BuildDir"
 
 Assert-Tool $Xvlog
 Assert-Tool $Xelab
@@ -96,33 +112,39 @@ if ($UsePackage) { Assert-Source $PkgFile }
 Assert-Source $RtlFile
 Assert-Source $TbFile
 
-# -- Step 1: Compile -----------------------------------------
-Write-Step "1" "Compile (xvlog)"
+Push-Location $BuildDir
+try {
+    # -- Step 1: Compile -----------------------------------------
+    Write-Step "1" "Compile (xvlog)"
 
-$CompileArgs = @("-sv")
-if ($UsePackage) { $CompileArgs += $PkgFile }
-$CompileArgs += $RtlFile
-$CompileArgs += $TbFile
+    $CompileArgs = @("-sv")
+    if ($UsePackage) { $CompileArgs += $PkgFile }
+    $CompileArgs += $RtlFile
+    $CompileArgs += $TbFile
 
-Run-Command -Tool $Xvlog -CmdArgs $CompileArgs
+    Run-Command -Tool $Xvlog -CmdArgs $CompileArgs
 
-# -- Step 2: Elaborate ---------------------------------------
-Write-Step "2" "Elaborate (xelab)"
+    # -- Step 2: Elaborate ---------------------------------------
+    Write-Step "2" "Elaborate (xelab)"
 
-$ElabArgs = @(
-    "-top",       $TopName,
-    "-snapshot",  $SnapshotName,
-    "-timescale", $Timescale
-)
+    $ElabArgs = @(
+        "-top",       $TopName,
+        "-snapshot",  $SnapshotName,
+        "-timescale", $Timescale
+    )
 
-Run-Command -Tool $Xelab -CmdArgs $ElabArgs
+    Run-Command -Tool $Xelab -CmdArgs $ElabArgs
 
-# -- Step 3: Simulate ----------------------------------------
-Write-Step "3" "Simulate (xsim)"
+    # -- Step 3: Simulate ----------------------------------------
+    Write-Step "3" "Simulate (xsim)"
 
-$SimArgs = @($SnapshotName, "-R")
+    $SimArgs = @($SnapshotName, "-R")
 
-Run-Command -Tool $Xsim -CmdArgs $SimArgs
+    Run-Command -Tool $Xsim -CmdArgs $SimArgs
+}
+finally {
+    Pop-Location
+}
 
 # -- Done ----------------------------------------------------
 Write-Host ""

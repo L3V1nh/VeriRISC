@@ -13,11 +13,14 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 # 3. Go up one level to get the project ROOT directory
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+BUILD_DIR="$ROOT_DIR/build"
+
+mkdir -p "$BUILD_DIR"
 
 # 4. Dynamically set file names based on the first parameter ($1)
 MODULE_NAME="$1"
-VVP_OUT="$ROOT_DIR/sim/${MODULE_NAME}.vvp"
-VCD_FILE="$ROOT_DIR/sim/${MODULE_NAME}.vcd"
+VVP_OUT="$BUILD_DIR/${MODULE_NAME}.vvp"
+VCD_FILE="$BUILD_DIR/${MODULE_NAME}.vcd"
 TB_FILE="$ROOT_DIR/tb/${MODULE_NAME}_tb.sv"
 RTL_FILE="$ROOT_DIR/rtl/${MODULE_NAME}.sv"
 
