@@ -8,3 +8,9 @@ simple counter.
 ## Module 6: User define types
 - controller -> To use SystemVerilog user-defined types, procedural statements, and
 operators to model a state machine.
+## Module 7: Hierachy:
+- alu -> To use SystemVerilog user-defined types, procedural statements, and
+operators to model an ALU.
+## Module 9: Task n Functions
+- mem_test -> To use SystemVerilog subprogram enhancements to test a memory
+module.
