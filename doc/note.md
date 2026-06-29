@@ -16,3 +16,4 @@ operators to model an ALU.
 module.
 ## Module 10: Interfaces
 - mem_intf_tb -> To use a SystemVerilog interface with ports, modports and methods.
+- To assemble and test the VeriRISC CPU model.
