@@ -41,6 +41,48 @@ The VeriRISC CPU is built from modular hardware blocks interacting over a synchr
 4. **Execute** — The ALU processes the decoded operation, utilizing data from the accumulator or memory.
 5. **Write-back** — Stores execution results back into either the internal accumulator register or external system memory.
 
+
+---
+ 
+## Instruction Set Architecture (ISA)
+ 
+The VeriRISC CPU implements a minimal 8-instruction ISA, where each instruction is encoded as a 3-bit opcode. This compact design covers the essential operations for arithmetic, logic, memory access, flow control, and CPU management — sufficient to run complete programs on the RISC datapath.
+ 
+### Opcode Encoding
+ 
+| Opcode | Encoding | CPU Operation |
+|---|---|---|
+| `HLT` | `000` | Halt — stops CPU execution |
+| `SKZ` | `001` | Skip next instruction if zero flag is set |
+| `ADD` | `010` | Add memory data to accumulator |
+| `AND` | `011` | Bitwise AND of memory data and accumulator |
+| `XOR` | `100` | Bitwise XOR of memory data and accumulator |
+| `LDA` | `101` | Load accumulator from memory |
+| `STO` | `110` | Store accumulator to memory |
+| `JMP` | `111` | Jump to immediate address |
+ 
+### Control Unit Output Signals
+ 
+The controller FSM drives the following output signals each cycle to coordinate datapath operations:
+ 
+| Output Signal | Function |
+|---|---|
+| `mem_rd` | Memory read |
+| `load_ir` | Load instruction register |
+| `halt` | Halt |
+| `inc_pc` | Increment program counter |
+| `load_ac` | Load accumulator |
+| `load_pc` | Load program counter |
+| `mem_wr` | Memory write |
+
+The controller have 8 stages, which represented by the following state transition:
+
+![control state trasntition](doc/ctrl_state.png)
+
+The output control signal logic are the following:
+
+![ouput_ctrl](doc/ctrl_table.png)
+ 
 ---
 
 ## Development & Curriculum Modules
