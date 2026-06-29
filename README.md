@@ -120,13 +120,90 @@ The project was designed and verified incrementally through specialized technica
 
 ## Verification Strategy
 
-The verification environment is written entirely in **SystemVerilog**, separating test concerns from hardware execution.
+The testbench loads a pre-assembled program into the CPU's unified memory
+and runs it to completion. The program is structured as a self-checking
+routine — correctness is encoded in the program flow itself rather than
+external signal inspection.
 
-### Interface-Driven Design
-Connections between the testbench components and the RTL blocks utilize encapsulated interfaces rather than loose, error-prone wire mapping.
+**Pass/Fail is determined by which `HLT` the CPU reaches:**
 
-### Directional Safety (modports)
-Enforces strict Master/Slave/Monitor signal restrictions to trap structural wiring bugs at compile time.
+- Throughout the program, each `SKZ` + `HLT` pair acts as a **checkpoint
+  trap**. If the preceding operation produced the correct result (zero),
+  `SKZ` skips over the `HLT` and execution continues. If the result is
+  wrong (non-zero), `SKZ` does not skip — the CPU falls into that `HLT`
+  immediately, which the testbench flags as a **FAIL**.
+- The **single correct `HLT`** at the end of the program is only reachable if every checkpoint was passed — meaning
+  every operation produced the expected result and every trap was skipped.
+  Reaching this `HLT` is the **PASS** condition.
 
-### Task-Based Verification
-Reusable verification tasks mimic memory bus traffic to rigorously validate read/write boundaries, timing delays, and propagation windows.
+The testbench monitors the `halt` control signal and validates the program counter against the expected final address:
+ 
+| Test | Program | Expected PC at HALT |
+|---|---|---|
+| `CPUtest1` | Basic CPU Diagnostic | `0x17` |
+| `CPUtest2` | Advanced CPU Diagnostic | `0x10` |
+| `CPUtest3` | Fibonacci Numbers to 144 | `0x0C` |
+| `CPUtest4` | *(custom — in progress)* | TBD |
+ 
+---
+ 
+## Attribution & File Ownership
+ 
+This project was developed as part of the **Cadence Engineer Explorer Series — SystemVerilog for Design and Verification (Course Version 25.03)**.
+ 
+Some files in this repository originate from Cadence course materials and are not original work:
+ 
+| File | Status | Notes |
+|---|---|---|
+| `mem.sv` | Cadence-provided | Unmodified course material |
+| `cpu.sv` | Cadence-provided | Unmodified course material |
+| `cpu_tb_1.sv` / `cpu_tb_2.sv` / `cpu_tb_3.sv` | Cadence-provided, modified | Adapted from course testbench for Xilinx Vivado / xsim compatibility |
+| `cpu_tb_4.sv` | Original work | Custom test — authored independently |
+| All other RTL files | Original work | Designed and implemented as part of the course exercises |
+ 
+---
+## How to Run
+ 
+### Prerequisites
+ 
+- **Simulator:** Xilinx Vivado 2024.2 (xvlog / xelab / xsim)
+- **OS:** Windows (PowerShell 5.1+)
+- **Language:** SystemVerilog IEEE 1800-2017
+### Running the Simulation
+ 
+Navigate to the `sim/` directory and run the PowerShell script:
+ 
+```powershell
+# Run default test (Test 1)
+.\cpu_test_run.ps1
+ 
+# Run a specific test (1, 2, or 3)
+.\cpu_test_run.ps1 -TestNumber 2
+ 
+# Override Vivado installation path
+.\cpu_test_run.ps1 -VivadoPath "C:\Xilinx\Vivado\2024.2"
+```
+ 
+The script runs three steps automatically:
+ 
+| Step | Tool | Action |
+|---|---|---|
+| 1 | `xvlog` | Compile all RTL and testbench `.sv` files |
+| 2 | `xelab` | Elaborate the top-level design with timescale `1ns/100ps` |
+| 3 | `xsim` | Run the simulation to completion |
+ 
+Output files and simulation artifacts are written to the auto-created `build/` directory.
+ 
+### Parameters
+ 
+| Parameter | Default | Description |
+|---|---|---|
+| `-VivadoPath` | `C:\Xilinx\Vivado\2024.2` | Path to Vivado installation root |
+| `-RtlDir` | `..\rtl` | Path to RTL source directory |
+| `-TbDir` | `..\tb` | Path to testbench directory |
+| `-DataDir` | `.` | Directory containing `CPUtest*.dat` files |
+| `-TestNumber` | `1` | Test to run — `1`, `2`, or `3` |
+| `-Timescale` | `1ns/100ps` | Simulation timescale passed to xelab |
+
+### Module Tests
+There are some individual module tests used in the process, if you want to run you have to copy all contents in `sim/module_test` outside to `sim` folder
