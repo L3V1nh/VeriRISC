@@ -35,9 +35,9 @@ function Get-AbsolutePath([string]$Path) {
 }
 
 # -- Source files --------------------------------------------
-$RtlFile   = Join-Path (Get-AbsolutePath $RtlDir) "mem.sv"
-$TbFile    = Join-Path (Get-AbsolutePath $TbDir)  "mem_tb.sv"
-$TopFile   = Join-Path (Get-AbsolutePath $TbDir)  "mem_top.sv"
+$RtlFile   = Join-Path (Get-AbsolutePath $RtlDir) "mem_intf.sv"
+$TbFile    = Join-Path (Get-AbsolutePath $TbDir)  "mem_intf_tb.sv"
+$TopFile   = Join-Path (Get-AbsolutePath $TbDir)  "mem_intf_top.sv"
 
 # -- Tool paths ----------------------------------------------
 $BinDir = Join-Path $VivadoPath "bin"

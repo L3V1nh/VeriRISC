@@ -14,3 +14,5 @@ operators to model an ALU.
 ## Module 9: Task n Functions
 - mem_test -> To use SystemVerilog subprogram enhancements to test a memory
 module.
+## Module 10: Interfaces
+- mem_intf_tb -> To use a SystemVerilog interface with ports, modports and methods.
