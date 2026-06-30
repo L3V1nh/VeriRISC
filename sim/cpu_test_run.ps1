@@ -20,7 +20,7 @@ param (
     [string]$DataDir = ".",
 
     [Parameter(HelpMessage = "CPU test number to run (1, 2, or 3)")]
-    [ValidateRange(1, 3)]
+    [ValidateRange(1, 4)]
     [int]$TestNumber = 1,
 
     [Parameter(HelpMessage = "Timescale passed to xelab (default: 1ns/100ps)")]

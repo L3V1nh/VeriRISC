@@ -146,7 +146,37 @@ The testbench monitors the `halt` control signal and validates the program count
 | `CPUtest4` | *(custom — in progress)* | TBD |
  
 ---
+## Extension: Single-Level Subroutine Call & Return (`JRA`)
  
+The base VeriRISC ISA has no `CALL`/`RET` mechanism — `JMP` only supports a fixed immediate target baked into the instruction at compile time, so a function has no way to know where to return to. This extension adds minimal hardware to support **one level** of subroutine call and return, without widening the opcode field.
+### Design
+ 
+Rather than introducing a new opcode (which would require widening from 3 bits to 4 and re-encoding every existing program), the extension **reserves a sentinel operand value within the existing `JMP` opcode**:
+ 
+```
+jra = (ir == 8'hFF)   ; JMP with operand 0xFF means "return," not "jump to 0xFF"
+```
+ 
+| Signal | Behavior |
+|---|---|
+| `sto_pc` | Asserted when `opcode == JMP && ~jra` — every *normal* jump (a "call") latches the current PC into the new Return Address register before jumping. |
+| `ra_out` | Drives the RA register's contents onto the PC load path. |
+| `jra` | When set, the counter loads `PC ← RA` instead of the instruction's immediate field. |
+ 
+### New Hardware
+ 
+- **RA Register** — a new register (same structure as the existing accumulator) that holds the single saved return address.
+- **Counter modification** — the `counter` module gains a `jra` input; when asserted, it sources its next value from `RA` instead of the immediate address field.
+### Known Limitations
+ 
+- **Single level only** — no call stack. A second `JMP` (call) before a `JRA` (return) overwrites RA, so calling a function from within a function will lose the original return address. Recursion and nested calls are not supported.
+- **Reserved operand** — address `0xFF` can no longer be used as a real jump target. This is safe given the program memory range used by current tests, but is a permanent constraint on the address space.
+- **No call-before-return guard** — if `JRA` executes before any normal `JMP` has run, RA is undefined.
+### Future Work
+ 
+A full call stack (register array or memory-backed, with a stack pointer) would remove the single-level restriction and enable recursive/nested calls. This was scoped but not implemented, as it requires datapath changes beyond a single register and mux input.
+ 
+---
 ## Attribution & File Ownership
  
 This project was developed as part of the **Cadence Engineer Explorer Series — SystemVerilog for Design and Verification (Course Version 25.03)**.

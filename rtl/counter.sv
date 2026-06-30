@@ -1,6 +1,6 @@
 module counter (
-    input logic [4:0] data,
-    input load, enable, clk, rst_,
+    input logic [4:0] data, ra,
+    input load, enable, clk, rst_, jra,
     output logic [4:0] count
 );
     logic [4:0] count_next;
@@ -11,7 +11,8 @@ module counter (
 
     always_comb begin : next_logic
         count_next=count;
-        if(load) count_next = data;
+        if(jra) count_next = ra + 1; 
+        else if(load) count_next = data;
         else if(enable) count_next++;
     end
 endmodule

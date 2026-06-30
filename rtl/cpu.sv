@@ -14,10 +14,11 @@ timeprecision 100ps;
 import typedefs::*;
 
 logic    [7:0]   data_out, alu_out, accum, ir_out;
-logic    [4:0]   pc_addr, ir_addr, addr;
+logic    [4:0]   pc_addr, ir_addr, addr, ra_out;
 opcode_t   opcode;
-logic load_ac, mem_rd, mem_wr, inc_pc, load_pc, zero;
-
+logic load_ac, mem_rd, mem_wr, inc_pc, load_pc, zero, sto_pc, jra;
+// assign sto_pc = (opcode == JMP) & ~jra;
+assign jra = &ir_out;
 //SystemVerilog: .name port connections
 register ac     ( .out  (accum  ),
                   .data (alu_out),
@@ -33,6 +34,13 @@ register ir     ( .out (ir_out),
                   .rst_
                 );
 
+register #(.WIDTH(5)) ra ( .out (ra_out),
+                           .data(pc_addr),
+                           .clk,
+                           .enable (sto_pc),
+                           .rst_
+                         );
+
 assign opcode =  opcode_t'(ir_out[7:5]);
 
 assign ir_addr = ir_out[4:0]; 
@@ -42,7 +50,9 @@ counter  pc     ( .count  (pc_addr),
                   .clk  (clk),
                   .load (load_pc),
                   .enable (inc_pc),
-                  .rst_
+                  .rst_,
+                  .jra,
+                  .ra(ra_out)
                 );
 
 alu      alu1   ( .out (alu_out),
@@ -78,7 +88,9 @@ control  cntl   ( .load_ac,
                   .opcode,
                   .zero,
                   .clk(cntrl_clk),
-                  .rst_
+                  .rst_,
+                  .sto_pc,
+                  .jra
                 );
 
 endmodule

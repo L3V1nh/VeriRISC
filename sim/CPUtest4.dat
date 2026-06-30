@@ -1,0 +1,25 @@
+/******************************************************************************
+ * CPUtest4 - JRA (subroutine call/return) diagnostic
+ *
+ * Tests the new JRA mechanism: any JMP latches PC+1 into RA, and
+ * JMP to the reserved address 0x1F (all-1s, JRA) loads PC from RA instead.
+ *
+ * BEGIN calls a subroutine (SUB1) that loads DATA_1 (zero) into AC,
+ * then returns via JRA. Back at the call site, SKZ checks AC is zero
+ * to confirm both the call and the return landed correctly.
+ *****************************************************************************/
+
+//opcode_operand  // addr                   assembly code
+//--------------  // ----  -----------------------------------------------
+@00 111_00101     //  00   BEGIN:   JMP SUB1     // RA<=01, PC<=05
+    101_01010     //  01   RET_OK:  LDA DATA_1   // reached only via JRA; DATA_1=0
+    001_00000     //  02            SKZ          // AC==0 -> skip next HLT
+    000_00000     //  03            HLT          //FAIL: never returned, or DATA_1 load broken
+    000_00000     //  04   PASS:    HLT          //CONGRATULATIONS - JRA TEST PASSED!
+    101_01011     //  05   SUB1:    LDA DATA_2   // DATA_2=FF, nonzero proof subroutine ran
+    001_00000     //  06            SKZ          // AC!=0 -> does NOT skip
+    111_11111     //  07            JMP 0x1F     // JRA: PC<=RA (back to 0x01)
+    000_00000     //  08            HLT          //sanity: unreachable if SKZ@06 worked
+
+@0A 00000000      //  0A   DATA_1:              //constant 00(hex)
+    11111111      //  0B   DATA_2:              //constant FF(hex)

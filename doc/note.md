@@ -17,3 +17,9 @@ module.
 ## Module 10: Interfaces
 - mem_intf_tb -> To use a SystemVerilog interface with ports, modports and methods.
 - To assemble and test the VeriRISC CPU model.
+
+## Addition Implementation: JRA code and RA reg
+jra = ir == 1111_1111
+- RA reg: sto_pc, ra_out
+- control: sto_pc = opcode == JMP && ~jra
+- conter: jra -> pc = ra
